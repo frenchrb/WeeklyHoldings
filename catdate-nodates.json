@@ -1,0 +1,395 @@
+{
+  "queries": [
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 28
+      },
+      "expr": {
+        "op": "equals",
+        "operands": [
+          "      ",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 84
+      },
+      "expr": {
+        "op": "between",
+        "operands": [
+          "xx-xx-xxxx",
+          "yy-yy-yyyy"
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "field": {
+          "tag": "^"
+        }
+      },
+      "expr": {
+        "op": "exists",
+        "operands": [
+          "i",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 26
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "clp  ",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 26
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "ecp  ",
+          ""
+        ]
+      }
+    },
+	"and",
+	{
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 31
+      },
+      "expr": {
+        "op": "equals",
+        "operands": [
+          "-",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "field": {
+          "marcTag": "245"
+        }
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "field": {
+          "tag": "c"
+        }
+      },
+      "expr": {
+        "op": "at_least_one_field_not_have",
+        "operands": [
+          "BROWSING",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "field": {
+          "tag": "c"
+        }
+      },
+      "expr": {
+        "op": "at_least_one_field_not_have",
+        "operands": [
+          "Headphones",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 26
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "inp  ",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 26
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "inl  ",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 26
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "inv  ",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "bib"
+        },
+        "id": 26
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "invl ",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "17",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "18",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "19",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "23",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "110",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "111",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "112",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "113",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "143",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "144",
+          ""
+        ]
+      }
+    },
+    "and",
+    {
+      "target": {
+        "record": {
+          "type": "item"
+        },
+        "id": 61
+      },
+      "expr": {
+        "op": "not_equal",
+        "operands": [
+          "148",
+          ""
+        ]
+      }
+    }	
+  ]
+}
