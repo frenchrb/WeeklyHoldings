@@ -1,5 +1,6 @@
 import sys
 import configparser
+from pathlib import Path
 import json
 import requests
 import base64
@@ -10,12 +11,15 @@ import jmu_local_calls as jmulocal
 
 #currently using WeeklyHoldings env
 #python holdings.py 01-13-2019 01-16-2019
-def main(dates):
+def main(arglist):
     #read config file
     config = configparser.ConfigParser()
     config.read('config.ini')
     
-    startdate, enddate = dates
+    startdate, enddate, save_dir = arglist
+    print('Save dir:' + save_dir)
+    out_dir = Path(save_dir)
+    print(out_dir)
     
     #read create list criteria from file, inserting dates
     with open('holdings-nodates.json', 'r') as file:
@@ -133,7 +137,7 @@ def main(dates):
     
     today = datetime.now().strftime('%Y%m%d')
     ebook_outname = today + ' E-Book Holdings.xls'
-    book1.save(ebook_outname)
+    book1.save(out_dir / ebook_outname)
     
     ##write ebooks to spreadsheet
     ##list of fields to export - ebook export fields and notes.txt
@@ -270,7 +274,7 @@ def main(dates):
                     data_item_note += x['content']
                     
         sheet.write(row, 7, data_item_note, style = style)
-        book1.save(ebook_outname)
+        book1.save(out_dir / ebook_outname)
         
         #print()
         '''
@@ -310,7 +314,7 @@ def main(dates):
         sheet.write(0, index, c, style = style)
     
     no_e_outname = today + ' Weekly Holdings QA.xls'
-    book2.save(no_e_outname)
+    book2.save(out_dir / no_e_outname)
     
     print('writing other titles to spreadsheet')
     row = 0
@@ -511,7 +515,7 @@ def main(dates):
         sheet.write(row, 5, item_locs, style = style)
         sheet.write(row, 6, cn_type.__name__, style = style)
         
-        book2.save(no_e_outname)
+        book2.save(out_dir / no_e_outname)
             
     print('second spreadsheet completed')
     print()    

@@ -1,5 +1,6 @@
 import sys
 import configparser
+from pathlib import Path
 import json
 import requests
 import base64
@@ -7,12 +8,14 @@ from datetime import datetime
 
 #currently using WeeklyHoldings env
 #python catdate.py 01-13-2019 01-16-2019
-def main(dates):
+def main(arglist):
     #read config file
     config = configparser.ConfigParser()
     config.read('config.ini')
     
-    startdate, enddate = dates
+    startdate, enddate, save_dir = arglist
+    #print('Save dir:' + save_dir)
+    out_dir = Path(save_dir)
     
     #read create list criteria from file, inserting dates
     with open('catdate-nodates.json', 'r') as file:
@@ -52,11 +55,12 @@ def main(dates):
     '''
     
     today = datetime.now().strftime('%Y%m%d')
+    out_filename = today + ' bibs_to_set_catdate.txt'
     
     if j['total'] == 0:
         #print('No records need a catdate')
         #write message to file
-        with open(today + ' bibs_to_set_catdate.txt', 'w') as file:
+        with open(out_dir / out_filename, 'w') as file:
             file.write('No records need a catdate')
     else:
         ##put bib ids in list
@@ -117,7 +121,7 @@ def main(dates):
         #print(bib_num_list)
             
         #write bibs to file
-        with open(today + ' bibs_to_set_catdate.txt', 'w') as file:
+        with open(out_dir / out_filename, 'w') as file:
             for i in bib_num_list:
                 file.write(i + '\n')
     
