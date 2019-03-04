@@ -83,10 +83,11 @@ def main(arglist):
         oclc_num_exist = False
         call_num_exist = False
         for v in var_fields:
-            if '001' in v.values():
-                oclc_num_exist = True
-            if '050' in v.values() or '090' in v.values() or '092' in v.values() or '099' in v.values():
-                call_num_exist = True
+            if 'marcTag' in v:
+                if '001' in v['marcTag']:
+                    oclc_num_exist = True
+                if '050' in v['marcTag'] or '090' in v['marcTag'] or '092' in v['marcTag'] or '099' in v['marcTag']:
+                    call_num_exist = True
         #print(id, call_num_exist)
 
         if not oclc_num_exist:

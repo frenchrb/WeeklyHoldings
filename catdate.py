@@ -92,10 +92,11 @@ def main(arglist):
             oclc_num_exist = False
             call_num_exist = False
             for v in var_fields:
-                if '001' in v.values():
-                    oclc_num_exist = True
-                if '050' in v.values() or '090' in v.values() or '092' in v.values() or '099' in v.values():
-                    call_num_exist = True
+                if 'marcTag' in v:
+                    if '001' in v['marcTag']:
+                        oclc_num_exist = True
+                    if '050' in v['marcTag'] or '090' in v['marcTag'] or '092' in v['marcTag'] or '099' in v['marcTag']:
+                        call_num_exist = True
             #print(id, call_num_exist)
     
             if not oclc_num_exist:
@@ -106,24 +107,29 @@ def main(arglist):
         #print(bib_id_list)
         #print(len(bib_id_list))
         
-        #turn bib ids into bib numbers
-        bib_num_list = []
-        for b in bib_id_list:
-            bib_reversed = b[::-1]
-            total = 0
-            for i, digit, in enumerate(bib_reversed):
-                prod = (i+2)*int(digit)
-                total += prod
-            checkdigit = total%11
-            if checkdigit == 10:
-                checkdigit = 'x'
-            bib_num_list.append('b' + b + str(checkdigit))
-        #print(bib_num_list)
-            
-        #write bibs to file
-        with open(out_dir / out_filename, 'w') as file:
-            for i in bib_num_list:
-                file.write(i + '\n')
+        #if no bibs remain in list, print message; otherwise print bib numbers
+        if not bib_id_list:
+            with open(out_dir / out_filename, 'w') as file:
+                file.write('No records need a catdate')
+        else:   
+            #turn bib ids into bib numbers
+            bib_num_list = []
+            for b in bib_id_list:
+                bib_reversed = b[::-1]
+                total = 0
+                for i, digit, in enumerate(bib_reversed):
+                    prod = (i+2)*int(digit)
+                    total += prod
+                checkdigit = total%11
+                if checkdigit == 10:
+                    checkdigit = 'x'
+                bib_num_list.append('b' + b + str(checkdigit))
+            #print(bib_num_list)
+                
+            #write bibs to file
+            with open(out_dir / out_filename, 'w') as file:
+                for i in bib_num_list:
+                    file.write(i + '\n')
     
 if __name__ == '__main__':
     main(sys.argv[1:])
