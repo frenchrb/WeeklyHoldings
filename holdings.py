@@ -17,9 +17,8 @@ def main(arglist):
     config.read('config.ini')
     
     startdate, enddate, save_dir = arglist
-    print('Save dir:' + save_dir)
+    #print('Save dir:' + save_dir)
     out_dir = Path(save_dir)
-    print(out_dir)
     
     #read create list criteria from file, inserting dates
     with open('holdings-nodates.json', 'r') as file:
