@@ -98,17 +98,21 @@ def main(arglist):
     #print(bib_id_list)
     print(len(bib_id_list))
     
-    #split bibs into internet/not internet
+    #split bibs into internet/not internet; multi locs with internet go on non-e list
     bib_id_list_e = []
     bib_id_list_no_e = []
     for i in j['entries']:
         #print(i['locations'])
+        loc_list = []
         for l in i['locations']:
-            if 'in' in l['code']:
-                #print(l['code'])
+            loc_list.append(l['code'])
+        if 'inp' in loc_list or 'inv' in loc_list:
+            if len(loc_list) == 1:
                 bib_id_list_e.append(i['id'])
             else:
                 bib_id_list_no_e.append(i['id'])
+        else:
+            bib_id_list_no_e.append(i['id'])
     
     print('===EBOOKS===')
     print(bib_id_list_e)
