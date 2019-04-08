@@ -2,6 +2,7 @@ import sys
 import configparser
 from pathlib import Path
 import json
+import re
 import requests
 import base64
 import xlwt
@@ -86,6 +87,9 @@ def main(arglist):
             if 'marcTag' in v:
                 if '001' in v['marcTag']:
                     oclc_num_exist = True
+                    # Remove record if 001 starts with 'pct'
+                    if re.search(r'^pct', v['content']) is not None:
+                        oclc_num_exist = False
                 if '050' in v['marcTag'] or '090' in v['marcTag'] or '092' in v['marcTag'] or '099' in v['marcTag']:
                     call_num_exist = True
         #print(id, call_num_exist)
