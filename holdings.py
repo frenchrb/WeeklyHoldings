@@ -317,7 +317,7 @@ def main(arglist):
     #style = xlwt.XFStyle()
     #style.font = font
     
-    cols = ['BIB#', 'CALL#', 'TITLE', 'BIB LOCATION', 'ORDER LOCATION', 'ITEM LOCATION', 'CALL NUM TYPE']
+    cols = ['BIB#', 'OCLC#', 'CALL#', 'TITLE', 'BIB LOCATION', 'ORDER LOCATION', 'ITEM LOCATION', 'CALL NUM TYPE']
     for index, c in enumerate(cols):
         sheet.write(0, index, c, style = style)
     
@@ -354,6 +354,8 @@ def main(arglist):
             #print(v.keys())
             if 'marcTag' in v: #if it's a MARC field
                 #print(v['marcTag'])
+                if '001' in v['marcTag']:
+                    data_001 = v['content']
                 if '050' in v['marcTag']:
                     # if call_num != '':
                     if call_num:
@@ -513,15 +515,16 @@ def main(arglist):
             print(cn_type.__name__)
         '''
         if call_num_problem:
-            sheet.write(row, 1, call_num, style = style_blue)
+            sheet.write(row, 2, call_num, style = style_blue)
         else:
-            sheet.write(row, 1, call_num, style = style)
+            sheet.write(row, 2, call_num, style = style)
         
-        sheet.write(row, 2, title, style = style)
-        sheet.write(row, 3, bib_locs, style = style)
-        sheet.write(row, 4, order_locs, style = style)   
-        sheet.write(row, 5, item_locs, style = style)
-        # sheet.write(row, 6, cn_type.__name__, style = style)
+        sheet.write(row, 1, data_001, style = style)
+        sheet.write(row, 3, title, style = style)
+        sheet.write(row, 4, bib_locs, style = style)
+        sheet.write(row, 5, order_locs, style = style)   
+        sheet.write(row, 6, item_locs, style = style)
+        # sheet.write(row, 7, cn_type.__name__, style = style)
         
         book2.save(out_dir / no_e_outname)
             
