@@ -477,12 +477,12 @@ def main(arglist):
         #identify duplicate call numbers
         if ';' in call_num:
             call_num_problem = True
-        
+        '''
         utypes = [jmulocal.LocalSC, jmulocal.LocalCD, jmulocal.LocalCass, jmulocal.LocalJazzLP, jmulocal.LocalLP, jmulocal.LocalJuv, jmulocal.LocalPCD, pycn.units.LC, pycn.units.LcClass, pycn.units.Dewey, pycn.units.Local]
         cn = pycn.callnumber(call_num, unittypes=utypes)
         
         cn_type = type(cn)
-        '''
+        
         if cn_type is pycn.units.callnumbers.lc.LcClass: #incomplete LC call number
             print('INCOMPLETE CALL NUMBER (class only):', call_num)
             call_num_problem = True
@@ -521,7 +521,7 @@ def main(arglist):
         sheet.write(row, 3, bib_locs, style = style)
         sheet.write(row, 4, order_locs, style = style)   
         sheet.write(row, 5, item_locs, style = style)
-        sheet.write(row, 6, cn_type.__name__, style = style)
+        # sheet.write(row, 6, cn_type.__name__, style = style)
         
         book2.save(out_dir / no_e_outname)
             
