@@ -110,7 +110,7 @@ def main(arglist):
         loc_list = []
         for l in i['locations']:
             loc_list.append(l['code'])
-        if 'inp' in loc_list or 'inv' in loc_list:
+        if 'inp' in loc_list or 'inv' in loc_list or 'in' in loc_list:
             if len(loc_list) == 1:
                 bib_id_list_e.append(i['id'])
             else:
