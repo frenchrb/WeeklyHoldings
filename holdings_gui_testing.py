@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os
+from pathlib import Path
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
@@ -8,7 +10,8 @@ import holdings
 
 def save():
     global savepath
-    savepath = filedialog.askdirectory()
+    desktop = Path(os.path.expanduser('~')) / 'Desktop'
+    savepath = filedialog.askdirectory(initialdir=desktop)
     #print('savepath: ' + savepath)
 
 def runCatdate():
