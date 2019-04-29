@@ -7,6 +7,8 @@ import requests
 import base64
 import xlwt
 from datetime import datetime
+from jsonmerge import merge
+from jsonmerge import Merger
 import pycallnumber as pycn
 import jmu_local_calls as jmulocal
 
@@ -21,12 +23,12 @@ def main(arglist):
     #print('Save dir:' + save_dir)
     out_dir = Path(save_dir)
     
-    #read create list criteria from file, inserting dates
-    with open('holdings-nodates.json', 'r') as file:
-        data = file.read().replace('xx-xx-xxxx', startdate).replace('yy-yy-yyyy', enddate)
+    # Read create list criteria from file, inserting dates and starting bib number
+    with open('holdings_nodates_bib_limiter.json', 'r') as file:
+        data = file.read().replace('xx-xx-xxxx', startdate).replace('yy-yy-yyyy', enddate).replace('bxxxxxxx', 'b1000000')
     #print(data)
     
-    ##authenticate to get token, using Client Credentials Grant https://techdocs.iii.com/sierraapi/Content/zReference/authClient.htm
+    # Authenticate to get token, using Client Credentials Grant https://techdocs.iii.com/sierraapi/Content/zReference/authClient.htm
     key_secret = config.get('Sierra API', 'key') + ':' + config.get('Sierra API', 'secret')
     #print(key_secret)
     key_secret_encoded = base64.b64encode(key_secret.encode('UTF-8')).decode('UTF-8')
@@ -42,41 +44,68 @@ def main(arglist):
     headers = {
         'Accept': 'application/json',
         'Authorization': auth}
+    
+    # Retrieve first set of record IDs for create list query
     response = requests.request('POST', 'https://catalog.lib.jmu.edu/iii/sierra-api/v5/bibs/query?offset=0&limit=2000', headers=headers, data=data)
     #print('request sent')
     #print(response.text)
     j = response.json()
+    records_returned = j['total']
+    print('Records returned:', j['total'])
+    j_all = j
     
-    '''
-    #for testing when not doing api call
-    with open('response to create list search.json', 'r') as file:
-        f = file.read()   
-    #print(f)
-    j = json.loads(f)
-    #print(j['entries'])
-    #end lines for testing
-    '''
-    
-    ##put bib ids in list
+    # If limit was reached, repeat until all record IDs are retrieved
+    while j['total'] == 2000:
+        print('--------------------------------')
+        last_record_id = j['entries'][-1:][0]['link'].replace('https://catalog.lib.jmu.edu/iii/sierra-api/v5/bibs/', '')
+        print('id of last record returned:', last_record_id)
+        next_record_id = str(int(last_record_id) + 1)
+        print('id of starting record for next query:', next_record_id)
+        
+        # Read create list criteria from file, inserting dates and starting bib number
+        with open('holdings_nodates_bib_limiter.json', 'r') as file:
+            data = file.read().replace('xx-xx-xxxx', startdate).replace('yy-yy-yyyy', enddate).replace('bxxxxxxx', 'b' + next_record_id)
+        
+        response = requests.request('POST', 'https://catalog.lib.jmu.edu/iii/sierra-api/v5/bibs/query?offset=0&limit=2000', headers=headers, data=data)
+        j = response.json()
+        records_returned += j['total']
+        print('Records returned:', records_returned)
+        # print(response.text)
+            
+        # Add new response to previous ones
+        schema = {"properties":{"entries":{"mergeStrategy":"append"}}}
+        merger = Merger(schema)
+        j_all = merger.merge(j_all, j)
+        j_all['total'] = records_returned 
+        
+    # Put bib IDs in list
     bib_id_list = []
-    for i in j['entries']:
+    for i in j_all['entries']:
         bib_id = i['link'].replace('https://catalog.lib.jmu.edu/iii/sierra-api/v5/bibs/', '')
         bib_id_list.append(bib_id)
-    #print(bib_id_list)
-    #print(len(bib_id_list))
+    # print(bib_id_list)
+    # print(len(bib_id_list))
     
-    #get bib info for all records
+    # Get bib info for all records, 500 bib IDs at a time
     fields = 'default,locations,bibLevel,varFields,orders' #orders only returns data for order records with status o (on order) and not status a (fully paid), so it's pretty useless for this and there's no other option
     #querystring = {'id':'3323145', 'fields':fields}
-    querystring = {'id':','.join(bib_id_list), 'fields':fields, 'limit':2000}
-    response = requests.request('GET', 'https://catalog.lib.jmu.edu/iii/sierra-api/v5/bibs/', headers=headers, params=querystring)
-    j = response.json()
-    #print(j)
-    #with open('bib_info_loc&varFields.json', 'w') as file:
-    #    file.write(json.dumps(j))
+    j_data_all = {}
+    records_returned_data = 0
+    chunk_size = 499
+    for i in range(0, len(bib_id_list), chunk_size):
+        bib_id_list_partial = bib_id_list[i:i+chunk_size]
+        querystring = {'id':','.join(bib_id_list_partial), 'fields':fields, 'limit':2000}
+        response = requests.request('GET', 'https://catalog.lib.jmu.edu/iii/sierra-api/v5/bibs/', headers=headers, params=querystring)
+        j_data = response.json()
+        records_returned_data += j_data['total']
+        j_data_all = merger.merge(j_data_all, j_data)
+        j_data_all['total'] = records_returned_data
+    
+    # with open('test_output_jsoncombined.json', 'w') as file:
+        # file.write(json.dumps(j_data_all))
         
-    #identify and remove records with no OCLC# and no call#
-    for i in j['entries']:
+    # Identify and remove records with no OCLC# and no call#
+    for i in j_data_all['entries']:
         id = i['id']
         var_fields = i['varFields']
         #print(var_fields)
@@ -86,9 +115,12 @@ def main(arglist):
         for v in var_fields:
             if 'marcTag' in v:
                 if '001' in v['marcTag']:
+                    print(v['content'])
                     oclc_num_exist = True
                     # Remove record if 001 starts with 'pct'
+                    print(re.search(r'^pct', v['content']))
                     if re.search(r'^pct', v['content']) is not None:
+                        print('remove this record; 001 starts with pct')
                         oclc_num_exist = False
                 if '050' in v['marcTag'] or '090' in v['marcTag'] or '092' in v['marcTag'] or '099' in v['marcTag']:
                     call_num_exist = True
@@ -102,10 +134,10 @@ def main(arglist):
     #print(bib_id_list)
     print(len(bib_id_list))
     
-    #split bibs into internet/not internet; multi locs with internet go on non-e list
+    # Split bibs into internet/not internet; multi locs with internet go on non-e list
     bib_id_list_e = []
     bib_id_list_no_e = []
-    for i in j['entries']:
+    for i in j_data_all['entries']:
         #print(i['locations'])
         loc_list = []
         for l in i['locations']:
@@ -126,7 +158,7 @@ def main(arglist):
     print(len(bib_id_list_no_e))
     print('======')
     
-    #set up e-books spreadsheet with column headers
+    # Set up e-books spreadsheet with column headers
     #TODO is there a way to set the font for the whole workbook (including cells that don't get written to)?
     book1 = xlwt.Workbook(encoding='utf-8')
     sheet = book1.add_sheet('Sheet1')
@@ -147,9 +179,9 @@ def main(arglist):
     ebook_outname = today + ' E-Book Holdings.xls'
     book1.save(out_dir / ebook_outname)
     
-    ##write ebooks to spreadsheet
-    ##list of fields to export - ebook export fields and notes.txt
-    #if adding additional fields, may need to also add them in line 62
+    # Write ebooks to spreadsheet
+    # List of fields to export - ebook export fields and notes.txt
+    # If adding additional fields, may need to also add them in line 92
     print('writing e-books to spreadsheet')
     row = 0
     for id in bib_id_list_e:
@@ -158,7 +190,7 @@ def main(arglist):
         
         #print(id)
         
-        #turn bib id into bib number
+        # Turn bib id into bib number
         bib_reversed = id[::-1]
         total = 0
         for i, digit, in enumerate(bib_reversed):
@@ -171,10 +203,10 @@ def main(arglist):
         #print(bib_num)
         sheet.write(row, 0, bib_num, style = style)
         
-        #find the part of j['entries'] with this id
-        bib_data = next(item for item in j['entries'] if item['id'] == id)
+        # Find the part of j_data_all['entries'] with this id
+        bib_data = next(item for item in j_data_all['entries'] if item['id'] == id)
         
-        #locations
+        # Locations
         #print(bib_data['locations'])
         #print(str(len(bib_data['locations'])) + '===number of locations')
         locs = ''
@@ -185,13 +217,13 @@ def main(arglist):
         #print('LOCATIONS:', locs)
         sheet.write(row, 3, locs, style = style)
         
-        #bibLevel
+        # bibLevel
         bib_lvl = ''
         bib_lvl = bib_data['bibLevel']['code']
         #print(bib_lvl)
         sheet.write(row, 2, bib_lvl, style = style)
         
-        #variable fields
+        # Variable fields
         var_fields = bib_data['varFields']
         
         data_001 = ''
@@ -259,7 +291,7 @@ def main(arglist):
         sheet.write(row, 9, data_245, style = style)
         sheet.write(row, 10, data_856u, style = style)
         
-        #get item info for this bib
+        # Get item info for this bib
         fields = 'varFields,location'
         #querystring = {'id':'3323145', 'fields':fields}
         querystring = {'bibIds': id, 'fields':fields, 'limit':2000}
@@ -308,7 +340,7 @@ def main(arglist):
     print()
         
 
-    #set up non-internet spreadsheet with column headers
+    # Set up non-internet spreadsheet with column headers
     book2 = xlwt.Workbook(encoding='utf-8')
     sheet = book2.add_sheet('Sheet1')
     #font = xlwt.Font()
@@ -329,7 +361,7 @@ def main(arglist):
     for id in bib_id_list_no_e:
         row += 1
         
-        #turn bib id into bib number
+        # Turn bib id into bib number
         bib_reversed = id[::-1]
         total = 0
         for i, digit, in enumerate(bib_reversed):
@@ -342,11 +374,11 @@ def main(arglist):
         #print(bib_num)
         sheet.write(row, 0, bib_num, style = style)
         
-        #find the part of j['entries'] with this id
-        bib_data = next(item for item in j['entries'] if item['id'] == id)
+        # Find the part of j_data_all['entries'] with this id
+        bib_data = next(item for item in j_data_all['entries'] if item['id'] == id)
         var_fields = bib_data['varFields']
         
-        #call number (050, 090, 099, 092) and title (245)
+        # Call number (050, 090, 099, 092) and title (245)
         call_num = ''
         call_num_problem = False
         title = ''
@@ -406,7 +438,7 @@ def main(arglist):
                         if '6' not in s['tag']:
                             title += s['content']
         
-        #bib locations
+        # Bib locations
         bib_locs = ''
         for x, c in enumerate(bib_data['locations']):
             bib_locs += c['code']
@@ -414,7 +446,7 @@ def main(arglist):
                 bib_locs += ','
         #print('LOCATIONS:', bib_locs)
         
-        #order locations -- missing lots of locations because orders only returned when status is o and not a
+        # Order locations -- missing lots of locations because orders only returned when status is o and not a
         order_locs = ''
         for x, o in enumerate(bib_data['orders']):
             #print(o['location']['code'])
@@ -422,7 +454,7 @@ def main(arglist):
                 order_locs += ';'
             order_locs += o['location']['code']
         
-        #item locations
+        # Item locations
         #get item info for this bib
         fields = 'location'
         querystring = {'bibIds': id, 'fields':fields, 'limit':2000}
