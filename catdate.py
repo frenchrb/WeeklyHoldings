@@ -20,6 +20,10 @@ def main(arglist):
     #print('Save dir:' + save_dir)
     out_dir = Path(save_dir)
     
+    # jsonmerge setup
+    schema = {"properties":{"entries":{"mergeStrategy":"append"}}}
+    merger = Merger(schema)
+    
     # Read create list criteria from file, inserting dates and starting bib number
     with open('catdate_nodates_bib_limiter.json', 'r') as file:
         data = file.read().replace('xx-xx-xxxx', startdate).replace('yy-yy-yyyy', enddate).replace('bxxxxxxx', 'b1000000')
@@ -53,10 +57,6 @@ def main(arglist):
     
     today = datetime.now().strftime('%Y%m%d')
     out_filename = today + ' bibs_to_set_catdate.txt'
-    
-    # jsonmerge setup
-    schema = {"properties":{"entries":{"mergeStrategy":"append"}}}
-    merger = Merger(schema)
     
     if j['total'] == 0:
         #print('No records need a catdate')

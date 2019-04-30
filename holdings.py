@@ -23,6 +23,10 @@ def main(arglist):
     #print('Save dir:' + save_dir)
     out_dir = Path(save_dir)
     
+    # jsonmerge setup
+    schema = {"properties":{"entries":{"mergeStrategy":"append"}}}
+    merger = Merger(schema)
+    
     # Read create list criteria from file, inserting dates and starting bib number
     with open('holdings_nodates_bib_limiter.json', 'r') as file:
         data = file.read().replace('xx-xx-xxxx', startdate).replace('yy-yy-yyyy', enddate).replace('bxxxxxxx', 'b1000000')
@@ -73,8 +77,6 @@ def main(arglist):
         # print(response.text)
             
         # Add new response to previous ones
-        schema = {"properties":{"entries":{"mergeStrategy":"append"}}}
-        merger = Merger(schema)
         j_all = merger.merge(j_all, j)
         j_all['total'] = records_returned 
         
