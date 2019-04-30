@@ -1,6 +1,22 @@
 {
   "queries": [
     {
+      "target":{
+        "record":{
+          "type":"bib"
+        },
+        "id":81
+      },
+      "expr":{
+        "op":"greater_than_or_equal",
+        "operands":[
+          "bxxxxxxx",
+          ""
+        ]
+      }
+    },
+	"and", 
+    {
       "target": {
         "record": {
           "type": "bib"
